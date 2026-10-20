@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Dépôt d'image</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <main class="page-depot">
+            <section class="carte-depot">
+                <header class="carte-depot__entete">
+                    <h1 class="carte-depot__titre">Déposer une image</h1>
+                    <p class="carte-depot__sous-titre">Glissez votre fichier dans le cadre, ou cliquez pour le choisir.</p>
+                </header>
+
+                <label id="zone-depot" class="zone-depot" for="champ-fichier-image">
+                    <span class="zone-depot__contenu zone-depot__contenu--defaut">
+                        <span class="zone-depot__pictogramme" aria-hidden="true"></span>
+                        <span class="zone-depot__libelle">Glisser une image ici</span>
+                        <span class="zone-depot__aide">Ou cliquer pour parcourir. PNG, JPG ou WEBP.</span>
+                    </span>
+
+                    <div id="apercu-image" class="apercu-image" aria-live="polite"></div>
+
+                    <input id="champ-fichier-image" class="zone-depot__champ-fichier" type="file" accept="image/png, image/jpeg, image/webp" />
+                </label>
+
+                <div class="zone-precision">
+                    <label class="zone-precision__label" for="champ-precision">Précisions sur l’image ou ce que vous voulez :</label>
+                    <textarea id="champ-precision" class="zone-precision__champ-texte" name="description" rows="5" placeholder="Décrivez ce que vous voulez mettre en avant sur l’image, les détails à conserver, ou la demande précise..."></textarea>
+                </div>
+
+                <div class="carte-depot__pied">
+                    <button id="bouton-valider" class="bouton-valider" type="button">Valider</button>
+                </div>
+            </section>
+        </main>
+
+        <script>
+            const inputFichier = document.getElementById("champ-fichier-image");
+            const zoneDepot = document.getElementById("zone-depot");
+            const apercuImage = document.getElementById("apercu-image");
+
+            inputFichier.addEventListener("change", (event) => {
+                const fichier = event.target.files[0];
+
+                if (!fichier || !fichier.type.startsWith("image/")) {
+                    return;
+                }
+
+                const lecteur = new FileReader();
+
+                lecteur.onload = (charge) => {
+                    apercuImage.innerHTML = `<img src="${charge.target.result}" alt="Aperçu de l'image sélectionnée">`;
+                    zoneDepot.classList.add("zone-depot--selectionnee");
+                };
+
+                lecteur.readAsDataURL(fichier);
+            });
+        </script>
+    </body>
+</html>
