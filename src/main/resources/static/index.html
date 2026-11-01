@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Décrire une image</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <main class="page-depot">
+            <section class="carte-depot" aria-labelledby="titre-page">
+                <header class="carte-depot__entete">
+                    <h1 id="titre-page" class="carte-depot__titre">Décrire une image</h1>
+                    <p class="carte-depot__sous-titre">Choisissez une image JPEG, PNG ou WEBP, puis lancez son analyse.</p>
+                </header>
+
+                <form id="formulaire-depot" enctype="multipart/form-data">
+                    <label id="zone-depot" class="zone-depot" for="champ-fichier-image">
+                        <span class="zone-depot__contenu zone-depot__contenu--defaut">
+                            <span class="zone-depot__pictogramme" aria-hidden="true"></span>
+                            <span class="zone-depot__libelle">Image à analyser</span>
+                            <span class="zone-depot__aide">Choisissez ou déposez une image (10 Mo maximum).</span>
+                        </span>
+                        <div id="apercu-image" class="apercu-image" hidden></div>
+                        <input id="champ-fichier-image" class="zone-depot__champ-fichier" type="file"
+                               name="image" accept="image/jpeg, image/png, image/webp"
+                               aria-describedby="aide-depot" aria-required="true" />
+                    </label>
+                    <p id="aide-depot" class="zone-depot__instructions">Formats acceptés : JPEG, PNG ou WEBP. Taille maximale : 10 Mo.</p>
+                    <p id="etat-depot" class="message-etat" role="status" aria-live="polite" aria-atomic="true"></p>
+
+                    <div class="zone-precision">
+                        <label class="zone-precision__label" for="champ-question">Question (facultative)</label>
+                        <textarea id="champ-question" class="zone-precision__champ-texte" name="question"
+                                  rows="4" placeholder="Que voulez-vous savoir sur cette image ?"></textarea>
+                    </div>
+
+                    <div class="carte-depot__pied">
+                        <button id="bouton-analyse" class="bouton-valider" type="submit">Analyser l'image</button>
+                    </div>
+                </form>
+
+                <section id="zone-resultat" class="zone-resultat" aria-labelledby="titre-resultat" hidden>
+                    <h2 id="titre-resultat" class="zone-resultat__titre" tabindex="-1">Description de l'image</h2>
+                    <p id="description-image" class="zone-resultat__description" aria-live="polite" aria-atomic="true"></p>
+                    <p id="erreur-analyse" class="message-erreur" role="status" aria-live="polite" aria-atomic="true" tabindex="-1"></p>
+                    <div class="actions-resultat" aria-label="Actions sur la description">
+                        <button id="bouton-relire" class="bouton-secondaire" type="button" disabled>Relire</button>
+                        <button id="bouton-arreter" class="bouton-secondaire" type="button" disabled>Arrêter</button>
+                        <button id="bouton-nouvelle-image" class="bouton-secondaire" type="button">Nouvelle image</button>
+                    </div>
+                </section>
+            </section>
+        </main>
+
+        <script>
+            const formulaire = document.getElementById("formulaire-depot");
+            const inputFichier = document.getElementById("champ-fichier-image");
+            const champQuestion = document.getElementById("champ-question");
+            const zoneDepot = document.getElementById("zone-depot");
+            const apercuImage = document.getElementById("apercu-image");
+            const etatDepot = document.getElementById("etat-depot");
+            const boutonAnalyse = document.getElementById("bouton-analyse");
+            const zoneResultat = document.getElementById("zone-resultat");
+            const titreResultat = document.getElementById("titre-resultat");
+            const descriptionImage = document.getElementById("description-image");
+            const erreurAnalyse = document.getElementById("erreur-analyse");
+            const boutonRelire = document.getElementById("bouton-relire");
+            const boutonArreter = document.getElementById("bouton-arreter");
+            const boutonNouvelleImage = document.getElementById("bouton-nouvelle-image");
+            const typesAcceptes = ["image/jpeg", "image/png", "image/webp"];
+            let urlApercu = null;
+
+            function effacerApercu() {
+                if (urlApercu) {
+                    URL.revokeObjectURL(urlApercu);
+                    urlApercu = null;
+                }
+                apercuImage.replaceChildren();
+                apercuImage.hidden = true;
+                zoneDepot.classList.remove("zone-depot--selectionnee");
+            }
+
+            function afficherFichier(fichier) {
+                if (!fichier) return;
+                if (!typesAcceptes.includes(fichier.type)) {
+                    inputFichier.value = "";
+                    effacerApercu();
+                    etatDepot.textContent = "Format non accepté. Choisissez une image JPEG, PNG ou WEBP.";
+                    inputFichier.focus();
+                    return;
+                }
+                if (fichier.size > 10 * 1024 * 1024) {
+                    inputFichier.value = "";
+                    effacerApercu();
+                    etatDepot.textContent = "L'image ne doit pas dépasser 10 Mo.";
+                    inputFichier.focus();
+                    return;
+                }
+
+                effacerApercu();
+                urlApercu = URL.createObjectURL(fichier);
+                const image = document.createElement("img");
+                image.src = urlApercu;
+                image.alt = `Aperçu de l’image sélectionnée : ${fichier.name}`;
+                apercuImage.append(image);
+                apercuImage.hidden = false;
+                zoneDepot.classList.add("zone-depot--selectionnee");
+                etatDepot.textContent = `Image sélectionnée : ${fichier.name}.`;
+            }
+
+            inputFichier.addEventListener("change", () => afficherFichier(inputFichier.files[0]));
+
+            ["dragenter", "dragover"].forEach((typeEvenement) => {
+                zoneDepot.addEventListener(typeEvenement, (event) => {
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "copy";
+                    zoneDepot.classList.add("zone-depot--survol");
+                });
+            });
+
+            ["dragleave", "drop"].forEach((typeEvenement) => {
+                zoneDepot.addEventListener(typeEvenement, (event) => {
+                    event.preventDefault();
+                    zoneDepot.classList.remove("zone-depot--survol");
+                });
+            });
+
+            zoneDepot.addEventListener("drop", (event) => {
+                if (formulaire.getAttribute("aria-busy") === "true") return;
+                const fichier = event.dataTransfer.files[0];
+                if (!fichier) return;
+                const transfert = new DataTransfer();
+                transfert.items.add(fichier);
+                inputFichier.files = transfert.files;
+                afficherFichier(fichier);
+            });
+
+            formulaire.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                erreurAnalyse.textContent = "";
+                descriptionImage.textContent = "";
+                if (!inputFichier.files.length) {
+                    etatDepot.textContent = "Choisissez une image avant de lancer l'analyse.";
+                    inputFichier.focus();
+                    return;
+                }
+                if (!typesAcceptes.includes(inputFichier.files[0].type)) {
+                    etatDepot.textContent = "Format non accepté. Choisissez une image JPEG, PNG ou WEBP.";
+                    inputFichier.focus();
+                    return;
+                }
+
+                const donnees = new FormData(formulaire);
+                boutonAnalyse.disabled = true;
+                inputFichier.disabled = true;
+                champQuestion.disabled = true;
+                boutonRelire.disabled = true;
+                boutonArreter.disabled = true;
+                boutonNouvelleImage.disabled = true;
+                formulaire.setAttribute("aria-busy", "true");
+                etatDepot.textContent = "Analyse de l'image en cours…";
+                zoneResultat.hidden = false;
+                try {
+                    let reponse;
+                    try {
+                        reponse = await fetch("/api/description", {
+                            method: "POST",
+                            body: donnees
+                        });
+                    } catch {
+                        throw new Error("Impossible de contacter le service. Veuillez réessayer.");
+                    }
+                    let resultat;
+                    try {
+                        resultat = await reponse.json();
+                    } catch {
+                        throw new Error("Le service a renvoyé une réponse illisible. Veuillez réessayer.");
+                    }
+                    if (!reponse.ok) {
+                        throw new Error(resultat.erreur || "L'analyse a échoué. Veuillez réessayer.");
+                    }
+                    descriptionImage.textContent = resultat.description;
+                    boutonRelire.disabled = false;
+                    boutonArreter.disabled = false;
+                    etatDepot.textContent = "Analyse terminée.";
+                    titreResultat.focus();
+                    relireDescription();
+                } catch (erreur) {
+                    erreurAnalyse.textContent = erreur instanceof Error && erreur.name === "Error"
+                        ? erreur.message
+                        : "Une erreur inattendue est survenue. Veuillez réessayer.";
+                    etatDepot.textContent = "";
+                    erreurAnalyse.focus?.();
+                } finally {
+                    boutonAnalyse.disabled = false;
+                    inputFichier.disabled = false;
+                    champQuestion.disabled = false;
+                    boutonNouvelleImage.disabled = false;
+                    formulaire.removeAttribute("aria-busy");
+                }
+            });
+
+            function relireDescription() {
+                if (!("speechSynthesis" in window) || !descriptionImage.textContent) {
+                    erreurAnalyse.textContent = "La synthèse vocale n'est pas disponible dans ce navigateur.";
+                    return;
+                }
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(descriptionImage.textContent);
+                utterance.lang = "fr-FR";
+                const voixFrancaise = window.speechSynthesis.getVoices()
+                    .find((voix) => voix.lang.toLowerCase() === "fr-fr");
+                if (voixFrancaise) utterance.voice = voixFrancaise;
+                window.speechSynthesis.speak(utterance);
+            }
+
+            boutonRelire.addEventListener("click", relireDescription);
+            boutonArreter.addEventListener("click", () => {
+                if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+            });
+            boutonNouvelleImage.addEventListener("click", () => {
+                if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+                formulaire.reset();
+                effacerApercu();
+                descriptionImage.textContent = "";
+                erreurAnalyse.textContent = "";
+                boutonRelire.disabled = true;
+                boutonArreter.disabled = true;
+                zoneResultat.hidden = true;
+                etatDepot.textContent = "Choisissez une nouvelle image.";
+                inputFichier.focus();
+            });
+        </script>
+    </body>
+</html>
