@@ -141,9 +141,27 @@ body {
 }
 
 .zone-depot:hover,
-.zone-depot:focus-within {
+.zone-depot:focus-within,
+.zone-depot--survol {
     border-color: var(--couleur-accent);
     background-color: var(--couleur-zone-survol);
+}
+
+.zone-depot:focus-within {
+    outline: 3px solid var(--couleur-accent);
+    outline-offset: 3px;
+}
+
+.zone-depot__instructions {
+    margin: 0.5rem 0 0;
+    color: var(--couleur-encre-douce);
+    font-size: 0.9rem;
+}
+
+.message-etat {
+    min-height: 1.5em;
+    margin: 0.75rem 0 0;
+    color: var(--couleur-encre);
 }
 
 .zone-depot__contenu {
