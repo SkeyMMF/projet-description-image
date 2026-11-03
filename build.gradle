@@ -19,6 +19,17 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'dev.langchain4j:langchain4j:1.0.0'
+    implementation 'dev.langchain4j:langchain4j-ollama:1.0.0-beta5'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'dev.langchain4j:langchain4j-ollama:1.0.0-beta5'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('processResources') {
+    from('src/main/resources') {
+        include 'index.html'
+        include 'style.css'
+        into 'static'
+    }
 }

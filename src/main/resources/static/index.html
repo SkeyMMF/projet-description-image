@@ -7,6 +7,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
         <link rel="stylesheet" href="style.css" />
     </head>
     <body>
@@ -24,6 +25,7 @@
                             <span class="zone-depot__libelle">Image à analyser</span>
                             <span class="zone-depot__aide">Choisissez ou déposez une image (10 Mo maximum).</span>
                         </span>
+
                         <div id="apercu-image" class="apercu-image" hidden></div>
                         <input id="champ-fichier-image" class="zone-depot__champ-fichier" type="file"
                                name="image" accept="image/jpeg, image/png, image/webp"
@@ -72,6 +74,7 @@
             const boutonArreter = document.getElementById("bouton-arreter");
             const boutonNouvelleImage = document.getElementById("bouton-nouvelle-image");
             const typesAcceptes = ["image/jpeg", "image/png", "image/webp"];
+
             let urlApercu = null;
 
             function effacerApercu() {
@@ -79,6 +82,7 @@
                     URL.revokeObjectURL(urlApercu);
                     urlApercu = null;
                 }
+
                 apercuImage.replaceChildren();
                 apercuImage.hidden = true;
                 zoneDepot.classList.remove("zone-depot--selectionnee");
@@ -93,6 +97,8 @@
                     inputFichier.focus();
                     return;
                 }
+
+
                 if (fichier.size > 10 * 1024 * 1024) {
                     inputFichier.value = "";
                     effacerApercu();
@@ -167,7 +173,7 @@
                 try {
                     let reponse;
                     try {
-                        reponse = await fetch("/api/description", {
+                        reponse = await fetch("/api/descriptions", {
                             method: "POST",
                             body: donnees
                         });
@@ -181,9 +187,9 @@
                         throw new Error("Le service a renvoyé une réponse illisible. Veuillez réessayer.");
                     }
                     if (!reponse.ok) {
-                        throw new Error(resultat.erreur || "L'analyse a échoué. Veuillez réessayer.");
+                        throw new Error(resultat.error || "L'analyse a échoué. Veuillez réessayer.");
                     }
-                    descriptionImage.textContent = resultat.description;
+                    descriptionImage.textContent = resultat.texte;
                     boutonRelire.disabled = false;
                     boutonArreter.disabled = false;
                     etatDepot.textContent = "Analyse terminée.";
@@ -234,6 +240,7 @@
                 etatDepot.textContent = "Choisissez une nouvelle image.";
                 inputFichier.focus();
             });
+
         </script>
     </body>
 </html>

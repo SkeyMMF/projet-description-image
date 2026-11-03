@@ -120,6 +120,25 @@ body {
     outline: none;
 }
 
+.resultat-description {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border: 1px solid var(--couleur-bordure);
+    border-radius: var(--rayon-zone);
+    background-color: var(--couleur-zone-survol);
+}
+
+.resultat-description__titre {
+    margin: 0 0 0.5rem;
+    font-family: var(--police-titre);
+    font-size: 1.35rem;
+}
+
+.resultat-description__texte {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
 /* ==========================================================================
    Zone de dépôt
    ========================================================================== */
