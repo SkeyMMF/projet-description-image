@@ -173,7 +173,7 @@
                 try {
                     let reponse;
                     try {
-                        reponse = await fetch("/api/descriptions", {
+                        reponse = await fetch("/api/description", {
                             method: "POST",
                             body: donnees
                         });
@@ -187,9 +187,9 @@
                         throw new Error("Le service a renvoyé une réponse illisible. Veuillez réessayer.");
                     }
                     if (!reponse.ok) {
-                        throw new Error(resultat.error || "L'analyse a échoué. Veuillez réessayer.");
+                        throw new Error(resultat.erreur || "L'analyse a échoué. Veuillez réessayer.");
                     }
-                    descriptionImage.textContent = resultat.texte;
+                    descriptionImage.textContent = resultat.description;
                     boutonRelire.disabled = false;
                     boutonArreter.disabled = false;
                     etatDepot.textContent = "Analyse terminée.";
